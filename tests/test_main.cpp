@@ -1,7 +1,10 @@
 #include <gtest/gtest.h>
 #include "graph/graph.hpp"
+#include "graph/algorithms.hpp"
 
 using namespace gqe;
+
+// ---- Graph tests ----
 
 TEST(GraphTest, AddNodeAndCheck) {
     Graph g;
@@ -24,4 +27,46 @@ TEST(GraphTest, EdgeToMissingNodeThrows) {
     Graph g;
     g.addNode(1);
     EXPECT_THROW(g.addEdge(1, 99, 1.0), std::invalid_argument);
+}
+
+// ---- BFS tests ----
+
+TEST(BFSTest, VisitOrder) {
+    Graph g;
+    for (int i = 1; i <= 4; i++) g.addNode(i);
+    g.addEdge(1, 2); g.addEdge(1, 3); g.addEdge(2, 4);
+
+    auto result = bfs(g, 1);
+    EXPECT_EQ(result[0], 1);
+    EXPECT_EQ(result.size(), 4);
+}
+
+TEST(BFSTest, InvalidStartReturnsEmpty) {
+    Graph g;
+    EXPECT_TRUE(bfs(g, 99).empty());
+}
+
+// ---- Dijkstra tests ----
+
+TEST(DijkstraTest, ShortestPaths) {
+    Graph g;
+    for (int i = 1; i <= 4; i++) g.addNode(i);
+    g.addEdge(1, 2, 1.0);
+    g.addEdge(1, 3, 4.0);
+    g.addEdge(2, 3, 2.0);
+    g.addEdge(2, 4, 6.0);
+    g.addEdge(3, 4, 1.0);
+
+    auto dist = dijkstra(g, 1);
+    EXPECT_DOUBLE_EQ(dist[1], 0.0);
+    EXPECT_DOUBLE_EQ(dist[2], 1.0);
+    EXPECT_DOUBLE_EQ(dist[3], 3.0); // 1->2->3 cheaper than 1->3
+    EXPECT_DOUBLE_EQ(dist[4], 4.0); // 1->2->3->4
+}
+
+TEST(DijkstraTest, UnreachableNodeAbsent) {
+    Graph g;
+    g.addNode(1); g.addNode(2); // no edge between them
+    auto dist = dijkstra(g, 1);
+    EXPECT_EQ(dist.count(2), 0);
 }
