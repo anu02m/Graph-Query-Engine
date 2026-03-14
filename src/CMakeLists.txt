@@ -1,4 +1,4 @@
-add_library(gqe_lib graph.cpp)
+add_library(gqe_lib graph.cpp algorithms.cpp)
 target_include_directories(gqe_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_options(gqe_lib PRIVATE -Wall -Wextra -Wpedantic)
 
