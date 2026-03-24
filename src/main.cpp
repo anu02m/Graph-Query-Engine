@@ -3,12 +3,16 @@
 #include <string>
 #include "graph/graph.hpp"
 #include "graph/algorithms.hpp"
+#include "graph/wal.hpp"
 
 using namespace std;
 using namespace gqe;
 
 int main() {
     Graph g;
+    WAL wal("gqe.log");
+    wal.replay(g);    // Restore graph from log if it exists
+    
     string line;
 
     cout << "Graph Query Engine v0.1\n";
@@ -28,6 +32,7 @@ int main() {
         } else if (cmd == "add-node") {
             NodeId id;
             iss >> id;
+            wal.logAddNode(id);
             g.addNode(id);
             cout << "Node " << id << " added.\n";
 
@@ -36,6 +41,7 @@ int main() {
             double weight = 1.0;
             iss >> from >> to >> weight;
             try {
+                wal.logAddEdge(from, to, weight);
                 g.addEdge(from, to, weight);
                 cout << "Edge " << from << " -> " << to << " (weight " << weight << ") added.\n";
             } catch (const invalid_argument& e) {

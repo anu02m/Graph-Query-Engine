@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
-#include "graph/graph.hpp"
-#include "graph/algorithms.hpp"
 #include <atomic>
 #include <chrono>
 #include <thread>
+#include <fstream>
+#include "graph/graph.hpp"
+#include "graph/algorithms.hpp"
 #include "graph/thread_pool.hpp"
+#include "graph/wal.hpp"
 using namespace gqe;
 
 // ---- Graph tests ----
@@ -74,6 +76,8 @@ TEST(DijkstraTest, UnreachableNodeAbsent) {
     EXPECT_EQ(dist.count(2), 0);
 }
 
+// ----- Thread Pool tests ------
+
 TEST(ThreadPoolTest, TasksExecute) {
     ThreadPool pool(2);
     std::atomic<int> counter{0};
@@ -94,4 +98,36 @@ TEST(ThreadPoolTest, MultipleThreadsWork) {
 
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(counter.load(), 100);
+}
+
+// ----- WAL tests -----
+
+TEST(WALTest, LogAndReplay) {
+    const std::string path = "/tmp/test_wal.log";
+    std::remove(path.c_str()); // clean slate
+
+    {
+        WAL wal(path);
+        wal.logAddNode(1);
+        wal.logAddNode(2);
+        wal.logAddEdge(1, 2, 5.0);
+    }
+
+    Graph g;
+    WAL wal2(path);
+    wal2.replay(g);
+
+    EXPECT_TRUE(g.hasNode(1));
+    EXPECT_TRUE(g.hasNode(2));
+    EXPECT_EQ(g.neighbors(1)[0].to, 2);
+    EXPECT_DOUBLE_EQ(g.neighbors(1)[0].weight, 5.0);
+
+    std::remove(path.c_str()); // cleanup
+}
+
+TEST(WALTest, ReplayOnMissingFileDoesNotCrash) {
+    Graph g;
+    WAL wal("/tmp/nonexistent_wal.log");
+    EXPECT_NO_THROW(wal.replay(g));
+    std::remove("/tmp/nonexistent_wal.log");
 }
