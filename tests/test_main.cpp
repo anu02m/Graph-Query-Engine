@@ -7,6 +7,7 @@
 #include "graph/algorithms.hpp"
 #include "graph/thread_pool.hpp"
 #include "graph/wal.hpp"
+#include "graph/parser.hpp"
 using namespace gqe;
 
 // ---- Graph tests ----
@@ -130,4 +131,42 @@ TEST(WALTest, ReplayOnMissingFileDoesNotCrash) {
     WAL wal("/tmp/nonexistent_wal.log");
     EXPECT_NO_THROW(wal.replay(g));
     std::remove("/tmp/nonexistent_wal.log");
+}
+
+// ----- Parser tests -----
+
+
+TEST(ParserTest, ParseAddNode) {
+    Parser p;
+    Command cmd = p.parse("add-node 5");
+    EXPECT_EQ(cmd.type, CommandType::ADD_NODE);
+    EXPECT_EQ(cmd.args[0], "5");
+}
+
+TEST(ParserTest, ParseAddEdge) {
+    Parser p;
+    Command cmd = p.parse("add-edge 1 2 3.5");
+    EXPECT_EQ(cmd.type, CommandType::ADD_EDGE);
+    EXPECT_EQ(cmd.args[0], "1");
+    EXPECT_EQ(cmd.args[1], "2");
+    EXPECT_EQ(cmd.args[2], "3.5");
+}
+
+TEST(ParserTest, ParseBFS) {
+    Parser p;
+    Command cmd = p.parse("bfs 1");
+    EXPECT_EQ(cmd.type, CommandType::BFS);
+    EXPECT_EQ(cmd.args[0], "1");
+}
+
+TEST(ParserTest, ParseUnknown) {
+    Parser p;
+    Command cmd = p.parse("foobar");
+    EXPECT_EQ(cmd.type, CommandType::UNKNOWN);
+}
+
+TEST(ParserTest, ParseEmptyLine) {
+    Parser p;
+    Command cmd = p.parse("");
+    EXPECT_EQ(cmd.type, CommandType::UNKNOWN);
 }
