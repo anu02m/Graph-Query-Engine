@@ -1,7 +1,10 @@
 #include <gtest/gtest.h>
 #include "graph/graph.hpp"
 #include "graph/algorithms.hpp"
-
+#include <atomic>
+#include <chrono>
+#include <thread>
+#include "graph/thread_pool.hpp"
 using namespace gqe;
 
 // ---- Graph tests ----
@@ -69,4 +72,26 @@ TEST(DijkstraTest, UnreachableNodeAbsent) {
     g.addNode(1); g.addNode(2); // no edge between them
     auto dist = dijkstra(g, 1);
     EXPECT_EQ(dist.count(2), 0);
+}
+
+TEST(ThreadPoolTest, TasksExecute) {
+    ThreadPool pool(2);
+    std::atomic<int> counter{0};
+
+    for (int i = 0; i < 10; i++)
+        pool.enqueue([&counter] { counter++; });
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_EQ(counter.load(), 10);
+}
+
+TEST(ThreadPoolTest, MultipleThreadsWork) {
+    ThreadPool pool(4);
+    std::atomic<int> counter{0};
+
+    for (int i = 0; i < 100; i++)
+        pool.enqueue([&counter] { counter++; });
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    EXPECT_EQ(counter.load(), 100);
 }
