@@ -4,6 +4,7 @@
 #include "graph/algorithms.hpp"
 #include "graph/wal.hpp"
 #include "graph/parser.hpp"
+#include "graph/snapshot.hpp"
 
 using namespace std;
 using namespace gqe;
@@ -16,7 +17,8 @@ int main() {
     wal.replay(g);
 
     cout << "Graph Query Engine v0.1\n";
-    cout << "Commands: add-node <id>, add-edge <from> <to> <weight>, bfs <start>, dijkstra <start>, exit\n\n";
+    cout << "Commands: add-node <id>, add-edge <from> <to> <weight>, bfs <start>,\n";
+    cout << "          dijkstra <start>, save <file>, load <file>, exit\n\n";
 
     string line;
     while (true) {
@@ -76,9 +78,31 @@ int main() {
             break;
         }
 
+        case CommandType::SAVE: {
+            if (cmd.args.empty()) { cout << "Usage: save <file>\n"; break; }
+            try {
+                Snapshot::save(g, cmd.args[0]);
+                cout << "Graph saved to " << cmd.args[0] << "\n";
+            } catch (const exception& e) {
+                cout << "Error: " << e.what() << "\n";
+            }
+            break;
+        }
+
+        case CommandType::LOAD: {
+            if (cmd.args.empty()) { cout << "Usage: load <file>\n"; break; }
+            try {
+                Snapshot::load(g, cmd.args[0]);
+                cout << "Graph loaded from " << cmd.args[0] << "\n";
+            } catch (const exception& e) {
+                cout << "Error: " << e.what() << "\n";
+            }
+            break;
+        }
+
         case CommandType::UNKNOWN:
         default:
-            cout << "Unknown command. Try: add-node, add-edge, bfs, dijkstra, exit\n";
+            cout << "Unknown command. Try: add-node, add-edge, bfs, dijkstra, save, load, exit\n";
             break;
         }
     }

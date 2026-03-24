@@ -10,6 +10,8 @@ enum class CommandType {
     ADD_EDGE,
     BFS,
     DIJKSTRA,
+    SAVE,
+    LOAD,
     EXIT,
     UNKNOWN
 };

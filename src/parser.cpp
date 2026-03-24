@@ -26,6 +26,8 @@ CommandType Parser::resolveCommand(const std::string& token) {
     if (token == "add-edge")  return CommandType::ADD_EDGE;
     if (token == "bfs")       return CommandType::BFS;
     if (token == "dijkstra")  return CommandType::DIJKSTRA;
+    if (token == "save")      return CommandType::SAVE;
+    if (token == "load")      return CommandType::LOAD;
     if (token == "exit")      return CommandType::EXIT;
     return CommandType::UNKNOWN;
 }

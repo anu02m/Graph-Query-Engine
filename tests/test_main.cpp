@@ -8,6 +8,7 @@
 #include "graph/thread_pool.hpp"
 #include "graph/wal.hpp"
 #include "graph/parser.hpp"
+#include "graph/snapshot.hpp"
 using namespace gqe;
 
 // ---- Graph tests ----
@@ -169,4 +170,34 @@ TEST(ParserTest, ParseEmptyLine) {
     Parser p;
     Command cmd = p.parse("");
     EXPECT_EQ(cmd.type, CommandType::UNKNOWN);
+}
+
+// ----- Snapshot tests -----
+
+TEST(SnapshotTest, SaveAndLoad) {
+    const std::string path = "/tmp/test_snapshot.txt";
+
+    Graph g1;
+    g1.addNode(1); g1.addNode(2); g1.addNode(3);
+    g1.addEdge(1, 2, 2.0);
+    g1.addEdge(2, 3, 3.0);
+    Snapshot::save(g1, path);
+
+    Graph g2;
+    Snapshot::load(g2, path);
+
+    EXPECT_TRUE(g2.hasNode(1));
+    EXPECT_TRUE(g2.hasNode(2));
+    EXPECT_TRUE(g2.hasNode(3));
+    EXPECT_EQ(g2.neighbors(1)[0].to, 2);
+    EXPECT_DOUBLE_EQ(g2.neighbors(1)[0].weight, 2.0);
+    EXPECT_EQ(g2.neighbors(2)[0].to, 3);
+
+    std::remove(path.c_str());
+}
+
+TEST(SnapshotTest, LoadMissingFileThrows) {
+    Graph g;
+    EXPECT_THROW(Snapshot::load(g, "/tmp/nonexistent.txt"), std::runtime_error);
+    std::remove("/tmp/nonexistent.txt");
 }
