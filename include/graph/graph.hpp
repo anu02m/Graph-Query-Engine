@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <vector>
 #include <stdexcept>
+#include <shared_mutex>
 
 namespace gqe {
 
@@ -23,6 +24,10 @@ public:
 
 private:
     std::unordered_map<NodeId, std::vector<Edge>> adjList_;
+    mutable std::shared_mutex mutex_;
+
+    bool hasNodeInternal(NodeId id) const;
+    const std::vector<Edge>& neighborsInternal(NodeId id) const;
 };
 
 } // namespace gqe

@@ -11,21 +11,17 @@ using namespace gqe;
 using Clock = chrono::high_resolution_clock;
 
 // Builds a linear chain: 1->2->3->...->n
-Graph buildLinearGraph(int n) {
-    Graph g;
+void buildLinearGraph(Graph &g, int n) {
     for (int i = 1; i <= n; i++) g.addNode(i);
     for (int i = 1; i < n; i++)  g.addEdge(i, i + 1, 1.0);
-    return g;
 }
 
 // Builds a dense graph where every node connects to next 10 nodes
-Graph buildDenseGraph(int n) {
-    Graph g;
+void buildDenseGraph(Graph &g, int n) {
     for (int i = 1; i <= n; i++) g.addNode(i);
     for (int i = 1; i <= n; i++)
         for (int j = i + 1; j <= min(i + 10, n); j++)
             g.addEdge(i, j, 1.0);
-    return g;
 }
 
 template<typename Fn>
@@ -66,13 +62,15 @@ int main() {
     // BFS benchmarks
     cout << "-- BFS --\n";
     for (int n : {1000, 10000, 100000}) {
-        Graph g = buildLinearGraph(n);
+        Graph g;
+        buildLinearGraph(g, n);
         benchBFS("linear n=" + to_string(n), g, 1);
     }
 
     cout << "\n-- Dijkstra --\n";
     for (int n : {1000, 10000, 50000}) {
-        Graph g = buildDenseGraph(n);
+        Graph g;
+        buildDenseGraph(g, n);
         benchDijkstra("dense n=" + to_string(n), g, 1);
     }
 

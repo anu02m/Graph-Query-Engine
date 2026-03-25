@@ -201,3 +201,27 @@ TEST(SnapshotTest, LoadMissingFileThrows) {
     EXPECT_THROW(Snapshot::load(g, "/tmp/nonexistent.txt"), std::runtime_error);
     std::remove("/tmp/nonexistent.txt");
 }
+
+// ------ Thread Safe tests ------
+
+TEST(ThreadSafeGraphTest, ConcurrentReadsAndWrites) {
+    Graph g;
+    for (int i = 1; i <= 100; i++) g.addNode(i);
+
+    ThreadPool pool(4);
+    std::atomic<int> readCount{0};
+
+    // concurrent reads and writes
+    for (int i = 1; i <= 100; i++) {
+        pool.enqueue([&g, i] {
+            if (i <= 50)
+                g.addNode(100 + i); // writes
+            else
+                g.hasNode(i);       // reads
+        });
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    EXPECT_TRUE(g.hasNode(1));
+    EXPECT_TRUE(g.hasNode(150));
+}
