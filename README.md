@@ -4,14 +4,14 @@ A high-performance graph database engine built in C++17 from scratch, featuring 
 
 ## Features
 
-- ✅ Core graph structure with weighted directed adjacency list
-- ✅ BFS and Dijkstra traversal algorithms
-- ✅ Interactive CLI with token-based query parser
-- ✅ Parallel task execution with thread pool
-- ✅ Crash recovery with Write-Ahead Log (WAL)
-- ✅ Graph persistence with snapshot save/load
-- ✅ Benchmarking suite (BFS, Dijkstra, thread pool)
-- ⬜ Thread-safe graph with reader-writer locks
+- Core graph structure with weighted directed adjacency list
+- BFS and Dijkstra traversal algorithms
+- Interactive CLI with token-based query parser
+- Parallel task execution with thread pool
+- Crash recovery with Write-Ahead Log (WAL)
+- Graph persistence with snapshot save/load
+- Benchmarking suite (BFS, Dijkstra, thread pool)
+- Thread-safe graph with shared_mutex reader-writer locks
 
 ## Tech Stack
 
@@ -76,7 +76,7 @@ gqe> exit
 cd build/debug && ./tests/gqe_tests
 ```
 
-18 tests across 5 suites: Graph, BFS, Dijkstra, ThreadPool, WAL, Snapshot, Parser.
+19 tests across 8 suites: Graph, BFS, Dijkstra, ThreadPool, WAL, Snapshot, Parser, ThreadSafeGraph.
 
 ## Benchmarks
 ```bash
@@ -86,11 +86,7 @@ cd build/debug && ./tests/gqe_tests
 
 Sample results (release build):
 ```
-BFS  [linear n=100000]: 4 ms
-Dijkstra [dense n=50000]: 7 ms
-ThreadPool [4 threads, 10k tasks]: 14 ms
+BFS  [linear n=100000]: 1 ms
+Dijkstra [dense n=50000]: 3 ms
+ThreadPool [4 threads, 10k tasks]: 4 ms
 ```
-
-## Status
-
-🚧 Under active development — thread-safe graph with reader-writer locks coming next.
